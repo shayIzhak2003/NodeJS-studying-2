@@ -11,12 +11,12 @@ This is a simple Node.js template with built-in CRUD (Create, Read, Update, Dele
 ## How to Use:
 
 1. **Install Dependencies**:  
-   Run the following command in your terminal to install the required `node_modules`:
-  A. npm i
+Run the following command in your terminal to install the required `node_modules`:
+A. npm i
 
 2. **Start the Server**:
-   After installing dependencies, start the server by running:
-  B. npm start
+After installing dependencies, start the server by running:
+B. npm start
 3. **Note for PowerShell Users**:
 If you encounter issues running commands in PowerShell:
 
@@ -37,6 +37,6 @@ If you're working on a frontend, use fetch or any HTTP client (like Axios) to co
 **Note**: When you see :id in the URL, replace it with the actual ID (like 1, 2, etc.) to update or delete a specific name.
 
 **Changing the Port**
- If you change the port in the server configuration, make sure to update the URL in the Postman requests as well:
+If you change the port in the server configuration, make sure to update the URL in the Postman requests as well:
 
 Example: http://localhost:(YourPort)/test-get
