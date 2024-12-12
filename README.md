@@ -12,11 +12,11 @@ This is a simple Node.js template with built-in CRUD (Create, Read, Update, Dele
 
 1. **Install Dependencies**:  
 Run the following command in your terminal to install the required `node_modules`:
-A. npm i
+npm i
 
 2. **Start the Server**:
 After installing dependencies, start the server by running:
-B. npm start
+npm start
 3. **Note for PowerShell Users**:
 If you encounter issues running commands in PowerShell:
 
