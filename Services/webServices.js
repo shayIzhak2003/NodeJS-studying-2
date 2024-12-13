@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 let users = [];
 router.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.status(200).send('Hello World!')
   })
 //get all users 
   router.get('/test-get', (req, res) => {
