@@ -46,13 +46,13 @@ router.post('/test-post', (req, res) => {
 //delete user by id
 router.delete('/test-delete/:id', (req, res) => {
     const { id } = req.params;
-    const user = users.findIndex(user => user.id === id);
+    const userID = users.findIndex(user => user.id === id);
 
-    if (user === -1) {
+    if (userID === -1) {
         console.log('User not found');
         return res.status(404).send('User not found');
     }
-    users.splice(user, 1);
+    users.splice(userID, 1);
     console.log(users); 
     res.status(200).send(users);
 })
