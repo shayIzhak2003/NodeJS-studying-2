@@ -33,7 +33,9 @@ const stockSchema = new mongoose.Schema({
   timestamps: true//adding createdAt updatedAt
 });
 
-const stockEntity = "stocks"
+const stockEntity = "stocks";
+const traderEntity = "traders"
+
 const traderSchema = new mongoose.Schema({
   position: {
     type: [{
@@ -44,7 +46,7 @@ const traderSchema = new mongoose.Schema({
   balance: {
     required: true,
     type: Number,
-    min: 50_000
+    min: -50_000
   },
   name: {
     type: String,
@@ -66,8 +68,7 @@ router.get('/', (req, res) => {
   })
 
 
-//get all users
-//get all users
+//get all stocks
 router.get("/" + stockEntity, async (req, res) => {
   try {
     //await **mongodb find users info here**
@@ -119,48 +120,58 @@ router.delete("/"+ stockEntity, async (req, res) => {
 });
 
 
-  //update a user by id
-  router.put('/test-put/:id', async (req, res) => {
-    const { name } = req.body;
-    const { id } = req.params;
-    try{
-    let haveID =false;
-    users = users.map(user => {
-        if (user.id == id) {
-          haveID = true;
-            return { ...user, name };
-        }
-        return user;
-    });
-    if(!haveID){
-      console.log('User not found');
-      return res.status(404).send('User not found');
-  }
-    console.log(users);
-    res.status(200).send(users);
-  }
-  catch(err){
-    res.status(500).json({message: 'Failed to update user', error: err});
+//TRADER
+//get all TRADERS
+router.get("/" + traderEntity, async (req, res) => {
+  try {
+    //await **mongodb find users info here**
+
+    const traders = await getAllEntities(traderEntity, traderSchema);
+
+    res.status(200).send(traders);
+    console.log(traders);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to get traders", error: err });
   }
 });
 
-//delete user by id
-router.delete('/test-delete/:id', async (req, res) => {
-    const { id } = req.params;
-    try{
-    const userID = users.findIndex(user => user.id === id);
-    if (userID === -1) {
-        console.log('User not found');
-        return res.status(404).send('User not found');
-    }
-    users.splice(userID, 1);
-    console.log(users); 
-    res.status(200).send(users);
+//create a new user and id
+router.post("/"+ traderEntity, async (req, res) => {
+  
+  try {
+   
+    const trader = await createEntity(req.body,traderEntity, traderSchema);
+    console.log(trader);
+    res.status(200).send(trader);
+  } catch (err) {
+    res.status(500).json({ error: err.message});
   }
-  catch(err){
-    res.status(400).json({message: 'Failed to delete user', error: err});
+});
+
+router.put("/"+ traderEntity, async (req, res) => {
+  
+  try {
+   
+    const trader = await updateEntity(req.body,traderEntity, traderSchema);
+    console.log(trader);
+    res.status(200).send(trader);
+  } catch (err) {
+    res.status(500).json({ error: err.message});
   }
-})
+});
+
+router.delete("/"+ traderEntity, async (req, res) => {
+  
+  try {
+   
+    const trader = await deleteEntity(req.body,traderEntity, traderSchema);
+    console.log(trader);
+    res.status(200).send(trader);
+  } catch (err) {
+    res.status(500).json({ error: err.message});
+  }
+});
+
 
 
 module.exports = router;
