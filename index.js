@@ -14,7 +14,7 @@ app.use('/trade-sys', router2);
 
 app.listen(PORT, () => {
   
+  console.log(`added a new commit to push.`);
   console.log(`Server running on http://localhost:${PORT}`);
-
   // runMe()
 });
