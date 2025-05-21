@@ -219,6 +219,7 @@ router.post('/stocks', async (req, res) => {
  *       200:
  *         description: Trade successful
  */
+// POST /traders/:traderId/buy/:stockId
 router.post('/traders/:traderId/buy/:stockId', async (req, res) => {
   const { traderId, stockId } = req.params;
   const { amount } = req.body;
@@ -239,6 +240,7 @@ router.post('/traders/:traderId/buy/:stockId', async (req, res) => {
       return res.status(400).json({ message: 'Insufficient balance' });
     }
 
+    // Update position
     const existingPosition = trader.position?.find(p => p.stock.toString() === stockId);
     if (existingPosition) {
       existingPosition.amount += amount;
@@ -247,8 +249,10 @@ router.post('/traders/:traderId/buy/:stockId', async (req, res) => {
       trader.position.push({ stock: stock._id, amount });
     }
 
+    // Deduct balance
     trader.balance -= totalCost;
 
+    // Update stocks owned
     const ownedStock = trader.stocks?.find(s => s.symbol === stock.symbol);
     if (ownedStock) {
       ownedStock.worth += totalCost;
@@ -257,12 +261,95 @@ router.post('/traders/:traderId/buy/:stockId', async (req, res) => {
       trader.stocks.push({ symbol: stock.symbol, worth: totalCost });
     }
 
+    // Update total worth
     trader.totalWorthOfStocks = trader.stocks.reduce((sum, s) => sum + (s.worth || 0), 0);
 
     const updatedTrader = await updateEntity({ ...trader, _id: trader._id }, USER_ENTITY, userSchema);
     res.status(200).json({ trader: updatedTrader });
   } catch (err) {
     res.status(500).json({ message: 'Failed to buy stock', error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/traders/{traderId}/sell/{stockId}:
+ *   post:
+ *     summary: Trader sells stock
+ *     tags: [Trade]
+ *     parameters:
+ *       - in: path
+ *         name: traderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: stockId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *             properties:
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Trade successful
+ */
+router.post('/traders/:traderId/sell/:stockId', async (req, res) => {
+  const { traderId, stockId } = req.params;
+  const { amount } = req.body;
+
+  try {
+    const users = await getAllEntities(USER_ENTITY, userSchema);
+    const stocks = await getAllEntities(STOCK_ENTITY, stockSchema);
+
+    const trader = users.find(t => t._id.toString() === traderId);
+    const stock = stocks.find(s => s._id.toString() === stockId);
+
+    if (!trader || !stock) {
+      return res.status(404).json({ message: 'Trader or stock not found' });
+    }
+
+    const position = trader.position?.find(p => p.stock.toString() === stockId);
+    if (!position || position.amount < amount) {
+      return res.status(400).json({ message: 'Not enough stock to sell' });
+    }
+
+    const saleValue = stock.price * amount;
+
+    // Update position
+    position.amount -= amount;
+    if (position.amount === 0) {
+      trader.position = trader.position.filter(p => p.stock.toString() !== stockId);
+    }
+
+    // Update stocks list
+    const ownedStock = trader.stocks?.find(s => s.symbol === stock.symbol);
+    if (ownedStock) {
+      ownedStock.worth -= saleValue;
+      if (ownedStock.worth <= 0) {
+        trader.stocks = trader.stocks.filter(s => s.symbol !== stock.symbol);
+      }
+    }
+
+    // Add to balance
+    trader.balance += saleValue;
+
+    // Recalculate total worth
+    trader.totalWorthOfStocks = trader.stocks.reduce((sum, s) => sum + (s.worth || 0), 0);
+
+    const updatedTrader = await updateEntity({ ...trader, _id: trader._id }, USER_ENTITY, userSchema);
+    res.status(200).json({ trader: updatedTrader });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to sell stock', error: err.message });
   }
 });
 
